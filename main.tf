@@ -153,6 +153,175 @@ data "aws_iam_policy_document" "glue-policy" {
   }
 }
 
+//  If service is codepipeline use following policy
+resource "aws_iam_role_policy" "codepipeline-policy" {
+  count  = var.enabled && var.allow_service == "codepipeline.amazonaws.com" ? 1 : 0
+  name   = "codepipeline-policy"
+  policy = data.aws_iam_policy_document.codepipeline-policy[0].json
+  role   = aws_iam_role.role[0].id
+}
+
+data "aws_iam_policy_document" "codepipeline-policy" {
+  count = var.enabled && var.allow_service == "codepipeline.amazonaws.com" ? 1 : 0
+  statement {
+    sid = "PassRole"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      "*"
+    ]
+    effect = "Allow"
+    condition {
+      test = "StringEqualsIfExists"
+      values = [
+        "cloudformation.amazonaws.com",
+        "elasticbeanstalk.amazonaws.com",
+        "ec2.amazonaws.com",
+        "ecs-tasks.amazonaws.com"
+      ]
+      variable = "iam:PassedToService"
+    }
+  }
+  statement {
+    sid = "CodeCommit"
+    actions = [
+      "codecommit:CancelUploadArchive",
+      "codecommit:GetBranch",
+      "codecommit:GetCommit",
+      "codecommit:GetUploadArchiveStatus",
+      "codecommit:UploadArchive"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "CodeDeploy"
+    actions = [
+      "codedeploy:CreateDeployment",
+      "codedeploy:GetApplication",
+      "codedeploy:GetApplicationRevision",
+      "codedeploy:GetDeployment",
+      "codedeploy:GetDeploymentConfig",
+      "codedeploy:RegisterApplicationRevision"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "Misc"
+    actions = [
+      "ecr:DescribeImages",
+      "elasticbeanstalk:*",
+      "ec2:*",
+      "elasticloadbalancing:*",
+      "autoscaling:*",
+      "cloudwatch:*",
+      "s3:*",
+      "sns:*",
+      "cloudformation:*",
+      "rds:*",
+      "sqs:*",
+      "ecs:*"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "Lambda"
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:ListFunctions"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "OpsWorks"
+    actions = [
+      "opsworks:CreateDeployment",
+      "opsworks:DescribeApps",
+      "opsworks:DescribeCommands",
+      "opsworks:DescribeDeployments",
+      "opsworks:DescribeInstances",
+      "opsworks:DescribeStacks",
+      "opsworks:UpdateApp",
+      "opsworks:UpdateStack"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "CloudFormation"
+    actions = [
+      "cloudformation:CreateStack",
+      "cloudformation:DeleteStack",
+      "cloudformation:DescribeStacks",
+      "cloudformation:UpdateStack",
+      "cloudformation:CreateChangeSet",
+      "cloudformation:DeleteChangeSet",
+      "cloudformation:DescribeChangeSet",
+      "cloudformation:ExecuteChangeSet",
+      "cloudformation:SetStackPolicy",
+      "cloudformation:ValidateTemplate"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "CodeBuild"
+    actions = [
+      "codebuild:BatchGetBuilds",
+      "codebuild:StartBuild"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "DeviceFarm"
+    actions = [
+      "devicefarm:ListProjects",
+      "devicefarm:ListDevicePools",
+      "devicefarm:GetRun",
+      "devicefarm:GetUpload",
+      "devicefarm:CreateUpload",
+      "devicefarm:ScheduleRun"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+  statement {
+    sid = "ServiceCatalog"
+    actions = [
+      "servicecatalog:ListProvisioningArtifacts",
+      "servicecatalog:CreateProvisioningArtifact",
+      "servicecatalog:DescribeProvisioningArtifact",
+      "servicecatalog:DeleteProvisioningArtifact",
+      "servicecatalog:UpdateProduct"
+    ]
+    effect = "Allow"
+    resources = [
+      "*"
+    ]
+  }
+}
+
 // Add KMS policy
 resource "aws_iam_role_policy" "kms-policy" {
   count  = var.enabled && length(concat(var.s3_read, var.s3_write)) > 0 ? 1 : 0

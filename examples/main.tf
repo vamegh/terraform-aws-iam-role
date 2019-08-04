@@ -11,7 +11,7 @@ module "iam_role" {
   source = "../"
   name   = "dp-dl-test-role"
 
-  allow_service = "glue.amazonaws.com"
+  allow_service = "codepipeline.amazonaws.com"
 
   //  allow_arn = [
   //    "arn:aws:iam::047625233815:user/netf"
