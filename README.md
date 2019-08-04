@@ -15,13 +15,13 @@ Terraform module to create IAM role. Currently following functionality is suppor
   module "iam_role" {
   source = "../"
   name = "dp-dl-test"
-  path = "/dataplatform/"
+  path = "/netf/"
   allow_arn = [
-    "arn:aws:iam::047625233815:user/netf"
+    "arn:aws:iam::1234567890:user/netf"
   ]
   
   assume_role = [
-    "arn:aws:iam::988339453305:role/test-role",
+    "arn:aws:iam::1234567890:role/test-role",
   ]
 
   s3_read = [
